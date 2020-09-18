@@ -12,8 +12,13 @@ __dir__ = os.path.abspath(os.path.dirname(__file__))
 
 class PSDMarginalizedGravitationalWaveTransient(GravitationalWaveTransient):
     def __init__(
-        self, interferometers, waveform_generator, n_segments,
-        reference_frame="H1L1", time_reference="geocent", **kwargs
+        self,
+        interferometers,
+        waveform_generator,
+        n_segments,
+        reference_frame="H1L1",
+        time_reference="geocent",
+        **kwargs
     ):
         """
 
@@ -38,9 +43,14 @@ class PSDMarginalizedGravitationalWaveTransient(GravitationalWaveTransient):
 
         """
         super(PSDMarginalizedGravitationalWaveTransient, self).__init__(
-            interferometers=interferometers, waveform_generator=waveform_generator,
-            priors=None, distance_marginalization=False, phase_marginalization=False,
-            time_marginalization=False, jitter_time=False, reference_frame=reference_frame,
+            interferometers=interferometers,
+            waveform_generator=waveform_generator,
+            priors=None,
+            distance_marginalization=False,
+            phase_marginalization=False,
+            time_marginalization=False,
+            jitter_time=False,
+            reference_frame=reference_frame,
             time_reference=time_reference,
         )
         self.n_segments = n_segments
@@ -55,7 +65,7 @@ class PSDMarginalizedGravitationalWaveTransient(GravitationalWaveTransient):
         )
 
     def noise_log_likelihood(self):
-        """ Calculates the real part of noise log-likelihood
+        """Calculates the real part of noise log-likelihood
 
         This has been hacked to make the normalisation agree with the GWT.
 
@@ -67,16 +77,17 @@ class PSDMarginalizedGravitationalWaveTransient(GravitationalWaveTransient):
         if self._noise_log_likelihood is None:
             log_l = 0
             for ifo in self.interferometers:
-                whitened_strain = abs(
-                    ifo.frequency_domain_strain[ifo.frequency_mask]
-                ) / ifo.amplitude_spectral_density_array[ifo.frequency_mask]
+                whitened_strain = (
+                    abs(ifo.frequency_domain_strain[ifo.frequency_mask])
+                    / ifo.amplitude_spectral_density_array[ifo.frequency_mask]
+                )
                 whitened_strain *= (4 / ifo.strain_data.duration) ** 0.5
                 log_l += sum(self._logpdf(abs(whitened_strain)))
             self._noise_log_likelihood = float(np.real(log_l))
         return self._noise_log_likelihood
 
     def log_likelihood(self):
-        """ Calculates the real part of log-likelihood value
+        """Calculates the real part of log-likelihood value
 
         Returns
         -------
@@ -96,12 +107,13 @@ class PSDMarginalizedGravitationalWaveTransient(GravitationalWaveTransient):
             return np.nan_to_num(-np.inf)
         log_l = 0
         for ifo in self.interferometers:
-            response = ifo.get_detector_response(
-                waveform, self.parameters
-            )[ifo.frequency_mask]
-            whitened_strain = abs(
-                ifo.frequency_domain_strain[ifo.frequency_mask] - response
-            ) / ifo.amplitude_spectral_density_array[ifo.frequency_mask]
+            response = ifo.get_detector_response(waveform, self.parameters)[
+                ifo.frequency_mask
+            ]
+            whitened_strain = (
+                abs(ifo.frequency_domain_strain[ifo.frequency_mask] - response)
+                / ifo.amplitude_spectral_density_array[ifo.frequency_mask]
+            )
             whitened_strain *= (4 / ifo.strain_data.duration) ** 0.5
             log_l += sum(self._logpdf(abs(whitened_strain)))
         log_l = float(np.real(log_l))
@@ -115,12 +127,19 @@ class MeanMarginalizedGravitationalWaveTransient(
     PSDMarginalizedGravitationalWaveTransient
 ):
     def __init__(
-        self, interferometers, waveform_generator, n_segments,
-        reference_frame="H1L1", time_reference="geocent",
+        self,
+        interferometers,
+        waveform_generator,
+        n_segments,
+        reference_frame="H1L1",
+        time_reference="geocent",
     ):
         super(MeanMarginalizedGravitationalWaveTransient, self).__init__(
-            interferometers, waveform_generator, n_segments,
-            reference_frame=reference_frame, time_reference=time_reference
+            interferometers,
+            waveform_generator,
+            n_segments,
+            reference_frame=reference_frame,
+            time_reference=time_reference,
         )
 
     def _logpdf(self, whitened_strain):
@@ -138,13 +157,15 @@ class MedianMarginalizedGravitationalWaveTransient(
     PSDMarginalizedGravitationalWaveTransient
 ):
 
-    data = pd.read_csv(
-        os.path.join(__dir__, "likelihood.dat"), sep="\t"
-    )
+    data = pd.read_csv(os.path.join(__dir__, "likelihood.dat"), sep="\t")
 
     def __init__(
-        self, interferometers, waveform_generator, n_segments,
-        reference_frame="H1L1", time_reference="geocent",
+        self,
+        interferometers,
+        waveform_generator,
+        n_segments,
+        reference_frame="H1L1",
+        time_reference="geocent",
     ):
         """
         A likelihood object, able to compute the likelihood of the data given
@@ -169,14 +190,18 @@ class MedianMarginalizedGravitationalWaveTransient(
 
         """
         super(MedianMarginalizedGravitationalWaveTransient, self).__init__(
-            interferometers, waveform_generator, n_segments,
-            reference_frame=reference_frame, time_reference=time_reference
+            interferometers,
+            waveform_generator,
+            n_segments,
+            reference_frame=reference_frame,
+            time_reference=time_reference,
         )
         self._interpolated_logpdf = interp1d(
-            self.data["x"] ** 0.5, self.data[str(self.n_segments)],
-            bounds_error=False, fill_value=(-np.log(2), -np.inf)
+            self.data["x"] ** 0.5,
+            self.data[str(self.n_segments)],
+            bounds_error=False,
+            fill_value=(-np.log(2), -np.inf),
         )
 
     def _logpdf(self, whitened_strain):
         return self._interpolated_logpdf(whitened_strain) - np.log(np.pi)
-

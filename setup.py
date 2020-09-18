@@ -6,7 +6,7 @@ import os
 
 
 def write_version_file(version):
-    """ Writes a file with version information to be used at run time
+    """Writes a file with version information to be used at run time
 
     Parameters
     ----------
@@ -71,7 +71,9 @@ setup(
     version=VERSION,
     packages=["median_marginalized"],
     package_dir={"median_marginalized": "src"},
-    package_data={'median_marginalized': [version_file, "likelihood.dat", "whitening.dat"]},
+    package_data={
+        "median_marginalized": [version_file, "likelihood.dat", "whitening.dat"]
+    },
     install_requires=["numpy", "scipy", "pandas", "bilby"],
     classifiers=[
         "Programming Language :: Python :: 3.7",
@@ -79,4 +81,3 @@ setup(
         "Operating System :: OS Independent",
     ],
 )
-
