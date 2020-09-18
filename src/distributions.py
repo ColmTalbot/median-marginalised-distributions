@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 from scipy.integrate import cumtrapz
+from scipy.interpolate import interp1d
 from scipy.stats import rv_continuous
 
 __dir__ = os.path.abspath(os.path.dirname(__file__))
